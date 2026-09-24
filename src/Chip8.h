@@ -1,12 +1,15 @@
+#pragma once
+
 #include <cstdint>
+#include <random>
 
 //Not sure if this types need to be 4 bytes in size yet
-const unsigned int MEMORY_SIZE = 4096;
-const unsigned int KEYPAD_COUNT = 16;
-const unsigned int REGISTER_COUNT = 16;
-const unsigned int STACK_LEVEL = 16;
-const unsigned int SCREEN_WIDTH = 64;
-const unsigned int SCREEN_HEIGHT = 32;
+constexpr unsigned int MEMORY_SIZE = 4096;
+constexpr unsigned int KEYPAD_COUNT = 16;
+constexpr unsigned int REGISTER_COUNT = 16;
+constexpr unsigned int STACK_LEVEL = 16;
+constexpr unsigned int SCREEN_WIDTH = 64;
+constexpr unsigned int SCREEN_HEIGHT = 32;
 
 class Chip8 {
 public:
@@ -21,7 +24,11 @@ private:
     uint16_t m_Pc{}; //program pointer
     uint16_t m_Index{}; // index register to store mem address. Max address is 0xFFF (12-bits) so we need 16 bits to cover lvl
     uint16_t m_Opcode;
-    
+
+    //used to generate random seed
+    std::default_random_engine m_RandGen;
+    std::uniform_int_distribution<uint8_t> m_ByteDist;
+
 public:
     uint8_t m_Keypad[KEYPAD_COUNT]{}; //16 keys keypad
     uint32_t m_screen[SCREEN_WIDTH * SCREEN_HEIGHT]{};

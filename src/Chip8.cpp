@@ -2,16 +2,15 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
-#include <random>
 
 // starting address of ROM instructions
-const unsigned int START_ADDRESS = 0x200;
+constexpr unsigned int START_ADDRESS = 0x200;
 
 //count in bytes for the character set of CHIP8
-const unsigned CHARACTER_COUNT = 80;
+constexpr unsigned int CHARACTER_COUNT = 80;
 
 //character_set start address
-const unsigned CHARACTER_SET_START_ADDRESS = 0x50;
+constexpr unsigned int CHARACTER_SET_START_ADDRESS = 0x50;
 
 uint8_t character_set[CHARACTER_COUNT] = {
      0xF0,  0x90,  0x90,  0x90,  0xF0, //0
@@ -40,20 +39,19 @@ uint8_t character_set[CHARACTER_COUNT] = {
  * 01110000 //0x70
  * */
 
-Chip8::Chip8(){
-
-    std::default_random_engine randGen(std::chrono::system_clock::now().time_since_epoch().count());
-
+//First we do member initialization list for RNG 
+Chip8::Chip8()
+    : m_RandGen(std::chrono::system_clock::now().time_since_epoch().count()),
+      m_ByteDist()//range(0,255u). Equivalent to m_ByteDist(0, 255u). See HEADER for clarity
+{
     m_Pc = START_ADDRESS;
 
     //load character set into memory one byte at time
 
     for(int i = 0; i < CHARACTER_COUNT; i++){
-        m_Memory[CHARACTER_COUNT + i] = character_set[i];
+        m_Memory[CHARACTER_SET_START_ADDRESS + i] = character_set[i];
     }
 
-    // initialize RNG
-    std::uniform_int_distribution<uint8_t>(0, 255u);
 }
  
 //load rom
