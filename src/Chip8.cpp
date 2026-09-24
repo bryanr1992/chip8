@@ -1,6 +1,8 @@
 #include "Chip8.h"
+#include <chrono>
 #include <iostream>
 #include <fstream>
+#include <random>
 
 // starting address of ROM instructions
 const unsigned int START_ADDRESS = 0x200;
@@ -40,6 +42,8 @@ uint8_t character_set[CHARACTER_COUNT] = {
 
 Chip8::Chip8(){
 
+    std::default_random_engine randGen(std::chrono::system_clock::now().time_since_epoch().count());
+
     m_Pc = START_ADDRESS;
 
     //load character set into memory one byte at time
@@ -47,6 +51,9 @@ Chip8::Chip8(){
     for(int i = 0; i < CHARACTER_COUNT; i++){
         m_Memory[CHARACTER_COUNT + i] = character_set[i];
     }
+
+    // initialize RNG
+    std::uniform_int_distribution<uint8_t>(0, 255u);
 }
  
 //load rom
