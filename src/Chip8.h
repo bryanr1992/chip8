@@ -9,6 +9,8 @@ const unsigned int SCREEN_WIDTH = 64;
 const unsigned int SCREEN_HEIGHT = 32;
 
 class Chip8 {
+public:
+    Chip8();
 private:
     uint8_t m_Memory[MEMORY_SIZE]; //4KB memory 1 byte each address 0-4095
     uint8_t mRegisters[REGISTER_COUNT]; //16 8-bit registers
