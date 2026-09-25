@@ -1,5 +1,6 @@
 #include "Chip8.h"
 #include <chrono>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 
@@ -13,8 +14,8 @@ constexpr unsigned int CHARACTER_COUNT = 80;
 constexpr unsigned int CHARACTER_SET_START_ADDRESS = 0x50;
 
 uint8_t character_set[CHARACTER_COUNT] = {
-     0xF0,  0x90,  0x90,  0x90,  0xF0, //0
-     0x20,  0x60,  0x20,  0x20,  0x70, //1
+    0xF0,  0x90,  0x90,  0x90,  0xF0, //0
+    0x20,  0x60,  0x20,  0x20,  0x70, //1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
     0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
 	0x90, 0x90, 0xF0, 0x10, 0x10, // 4
@@ -77,6 +78,23 @@ void Chip8::LoadRom(const char* filename) {
         //free the buffer
         delete[] buffer;
     }
+}
+//clears the screen
+void Chip8::OP_00E0(){
+    memset(m_Screen, 0, sizeof(m_Screen));
+}
+// RET instruction: returns from sburoutine
+void Chip8::OP_00EE() {
+    //When inside a subRoutine the top of the stack has the address
+    //of one instruction past the one that called the subRoutine.
+    //So we decrease SP first
+    --m_Sp;
+    m_Pc = m_Stack[m_Sp];
+}
+// Jump to instruction address
+void Chip8::OP_1nnn(){
+    uint16_t addr = m_Opcode & 0xFFFu;
+    m_Pc = addr;
 }
 
 int main() {

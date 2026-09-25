@@ -24,6 +24,10 @@ private:
     uint16_t m_Pc{}; //program pointer
     uint16_t m_Index{}; // index register to store mem address. Max address is 0xFFF (12-bits) so we need 16 bits to cover lvl
     uint16_t m_Opcode;
+private:
+    void OP_00E0(); //cls
+    void OP_00EE(); //RET
+    void OP_1nnn(); //JP Addr
 
     //used to generate random seed
     std::default_random_engine m_RandGen;
@@ -31,7 +35,7 @@ private:
 
 public:
     uint8_t m_Keypad[KEYPAD_COUNT]{}; //16 keys keypad
-    uint32_t m_screen[SCREEN_WIDTH * SCREEN_HEIGHT]{};
+    uint32_t m_Screen[SCREEN_WIDTH * SCREEN_HEIGHT]{};
 
 public:
     void LoadRom(const char* filename);
