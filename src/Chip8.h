@@ -16,18 +16,29 @@ public:
     Chip8();
 private:
     uint8_t m_Memory[MEMORY_SIZE]; //4KB memory 1 byte each address 0-4095
-    uint8_t mRegisters[REGISTER_COUNT]; //16 8-bit registers
+    uint8_t m_Registers[REGISTER_COUNT]; //16 8-bit registers
     uint8_t m_Sp{}; //stack pointer. We have a 16-lvl stack that can be index with 0-15
     uint8_t m_DelayTimer{};
     uint8_t m_AudioTimer{};
     uint16_t m_Stack[STACK_LEVEL]{};
     uint16_t m_Pc{}; //program pointer
     uint16_t m_Index{}; // index register to store mem address. Max address is 0xFFF (12-bits) so we need 16 bits to cover lvl
-    uint16_t m_Opcode;
+    uint16_t m_Opcode;// Stores CHIP8 CPU current instruction
 private:
     void OP_00E0(); //cls
     void OP_00EE(); //RET
     void OP_1nnn(); //JP Addr
+    void OP_2nnn(); //CALL Addr
+    void OP_3xkk(); // SE Vx, byte
+    void OP_4xkk(); // SNE Vx, byte
+    void OP_5xy0(); // SE Vx, Vy
+    void OP_6xkk(); // LD, Vc, byte
+    void OP_7xkk(); // Add Vx, byte
+    void OP_8xy0(); //LD vx, vy
+    void OP_8xy1(); // OR vx, vy
+    void OP_8xy2(); // AND vx, vy
+    void OP_8xy3(); // XOR vx, vy
+    void OP_8xy4(); // ADD vx,vy set carry
 
     //used to generate random seed
     std::default_random_engine m_RandGen;

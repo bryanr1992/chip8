@@ -93,9 +93,113 @@ void Chip8::OP_00EE() {
 }
 // Jump to instruction address
 void Chip8::OP_1nnn(){
-    uint16_t addr = m_Opcode & 0xFFFu;
+    // The OP codes on the CHIP8 are 16 bit long. The first 4 bits tell us the instruction we are meant
+    // to execute. Thus, the first thing we do after entering the routine/instruction/method is use a
+    // mask to get the remaining 12 bits ONLY which are for the address. (We throw away the top 4 bits) 0xFFFu = 0000 1111 1111 1111
+    uint16_t addr = m_Opcode & 0x0FFFu;
     m_Pc = addr;
 }
+//Call instruction at address
+void Chip8::OP_2nnn(){
+    uint16_t addr = m_Opcode & 0x0FFFu; // Grab 12 bits for addr
+    
+    m_Stack[m_Sp] = m_Pc; // store addr of current PC on stack
+    ++m_Sp; // increase stack pointer
+
+    m_Pc = addr; // Update PC with address of the subroutine
+}
+// Skip address of the next instruction if register Vx == byte  kk
+void Chip8::OP_3xkk(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u; // Get register number
+    uint8_t kk = m_Opcode & 0x00FF;// Get byte of data
+
+    //cmp bytes in register with byte of data
+    if (m_Registers[Vx] == kk) {
+        m_Pc += 2;
+    }
+}
+// Skip address of the next instruction register vx != byte kk
+void Chip8::OP_4xkk(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t xx = m_Opcode & 0x00FFu;
+
+    if (m_Registers[Vx] != xx){
+        m_Pc += 2;
+    }
+}
+// Skip address of the next instruction if register vx == register vy
+void Chip8::OP_5xy0(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    if (m_Registers[Vx] == m_Registers[Vy]){
+        m_Pc += 2;
+    }
+}
+// put the value of byte kk into register Vx
+void Chip8::OP_6xkk(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t kk = m_Opcode & 0x00FFu;
+
+    m_Registers[Vx] = Vx;
+}
+// adds the value of kk and Vx and stores in Vx
+void Chip8::OP_7xkk(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t kk = m_Opcode & 0x00FFu;
+
+    m_Registers[Vx] = m_Registers[Vx] + kk;
+}
+// stores the value of Vy in Vx
+void Chip8::OP_8xy0(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    m_Registers[Vx] = m_Registers[Vy];
+}
+// Set Vx to Vx OR Vy
+void Chip8::OP_8xy1(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    m_Registers[Vx] = m_Registers[Vx] | m_Registers[Vy];
+}
+// Set Vx to Vx AND Vy
+void Chip8::OP_8xy2(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    m_Registers[Vx] = m_Registers[Vx] & m_Registers[Vy];
+}
+// Set Vx to Vx XOR Vy
+void Chip8::OP_8xy3(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    m_Registers[Vx] = m_Registers[Vx] ^ m_Registers[Vy];
+}
+
+// Add vx,vy set carry
+void Chip8::OP_8xy4(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+
+    uint16_t sum = m_Registers[Vx] + m_Registers[Vy];
+    // bigger than the max val that can be represented in a byte
+    // EG: 0xFFu
+    if (sum > 255u){
+        m_Registers[0x0F] = 1;
+    } else {
+        m_Registers[0x0F] = 0;
+    }
+
+    m_Registers[Vx] = sum & 0xFFu;
+}
+
+
+
+
+
 
 int main() {
     std::cout << "Hello World of Emulators" << std::endl;
