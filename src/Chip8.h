@@ -38,7 +38,16 @@ private:
     void OP_8xy1(); // OR vx, vy
     void OP_8xy2(); // AND vx, vy
     void OP_8xy3(); // XOR vx, vy
-    void OP_8xy4(); // ADD vx,vy set carry
+    void OP_8xy4(); // ADD vx,vy set carr
+    void OP_8xy5(); // SUB vx, vy
+    void OP_8xy6(); // SHR Vx, by 1
+    void OP_8xy7(); // SUBN vx, vy
+    void OP_8xyE(); // SHL, vx, by 1
+    void OP_9xy0(); // SNE vx, vy
+    void OP_Annn(); // LD I, address
+    void OP_Bnnn(); // JP, to nnn + v0
+    void OP_Cxkk(); // RND Vx, byte
+    void OP_Dxyn(); // DRW Vx, Vy, nibble
 
     //used to generate random seed
     std::default_random_engine m_RandGen;

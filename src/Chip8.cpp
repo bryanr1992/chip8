@@ -1,5 +1,6 @@
 #include "Chip8.h"
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -45,6 +46,7 @@ Chip8::Chip8()
     : m_RandGen(std::chrono::system_clock::now().time_since_epoch().count()),
       m_ByteDist()//range(0,255u). Equivalent to m_ByteDist(0, 255u). See HEADER for clarity
 {
+    // We can also choose to not list initialize m_ByteDist and do m_ByteDist = std::uniform_int_distribution<uint8_t>(0, 255U); less efficient though
     m_Pc = START_ADDRESS;
 
     //load character set into memory one byte at time
@@ -195,12 +197,107 @@ void Chip8::OP_8xy4(){
 
     m_Registers[Vx] = sum & 0xFFu;
 }
+// subtract vy from vx set VF to 1 if vx > vy otherwise 0
+void Chip8::OP_8xy5(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+    
+    if (m_Registers[Vx] > m_Registers[Vy]) {
+        m_Registers[0x0F] = 1; 
+    } else {
+        m_Registers[0x0F] = 0;
+    }
 
+    m_Registers[Vx] = m_Registers[Vx] - m_Registers[Vy];
+}
+// set VF to 1 if the least significant bit is 1 then divide by 2 (SHIFT RIGHT 1)
+void Chip8::OP_8xy6(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    m_Registers[0x0F] = m_Opcode & 0x01u;
 
+    m_Registers[Vx] = m_Registers[Vx] >> 1;
+}
+// SUB Vx from Vy, store results on Vx
+void Chip8::OP_8xy7(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
+    
+    if (m_Registers[Vy] > m_Registers[Vx]) {
+        m_Registers[0x0F] = 1; 
+    } else {
+        m_Registers[0x0F] = 0;
+    }
 
+    m_Registers[Vx] = m_Registers[Vy] - m_Registers[Vx];
+}
+// Check if MSB is 1 and store in VF. Then multiply by 2 (SHIFT L)
+void Chip8::OP_8xyE(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
 
+    m_Registers[0x0F] = m_Registers[Vx] & 0x80; // 0x80 = 1000 0000
 
+    m_Registers[Vx] = m_Registers[Vx] << 1;
+}
+// Skip the next instruction if Vx != Vy
+void Chip8::OP_9xy0(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0u) >> 4u;
 
+    if (m_Registers[Vx] != m_Registers[Vy]){
+        m_Pc += 2;
+    }
+}
+// Set the value nnn to the index register
+void Chip8::OP_Annn(){
+    uint16_t nnn = m_Opcode & 0x0FFFu;
+
+    m_Index = nnn;
+}
+// Jump to address nnn + register V0
+void Chip8::OP_Bnnn(){
+    uint16_t nnn = m_Opcode & 0x0FFFu;
+
+    m_Pc = nnn + m_Registers[0x00];
+}
+// Set Vx = random byte AND kk
+void Chip8::OP_Cxkk(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t kk = m_Opcode & 0x00FFu;
+
+    m_Registers[Vx] = m_ByteDist(m_RandGen) & kk;
+}
+// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = Collision
+void Chip8:: OP_Dxyn(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (m_Opcode & 0x00F0) >> 4u;
+    uint8_t height = m_Opcode & 0x000Fu; // Height is stored in the last 4 bits
+
+    //Clear Vf
+    m_Registers[0x0F] = 0;
+
+    //If over boundary we need to wrap around
+    uint8_t xPos = m_Registers[Vx] % SCREEN_WIDTH;
+    uint8_t yPos = m_Registers[Vy] % SCREEN_HEIGHT;
+    
+    for (unsigned int row = 0; row < height; row++){
+        uint8_t spriteData = m_Memory[m_Index + row];
+        for(unsigned int col = 0; col < 8; col++){
+            uint8_t spritePixel = spriteData & (0x80u >> col);
+
+            uint32_t* screenPixel = &m_Screen[(xPos + col) + (yPos + row) * SCREEN_WIDTH]; //Essencially mapping 2D array coord into 1D (row * COL_NUMBER + col)
+
+            //pixel is on?
+            if (spritePixel){
+                //is the pixel on the screen on? meaning will it collide with the pixel being drawn
+                if (*screenPixel == 0xFFFFFFFF){
+                    m_Registers[0x0F] = 1;
+                }
+
+                *screenPixel = *screenPixel ^ 0xFFFFFFFF;
+            }
+        }
+    }
+}
 int main() {
     std::cout << "Hello World of Emulators" << std::endl;
     return 0;
