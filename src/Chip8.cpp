@@ -298,6 +298,167 @@ void Chip8:: OP_Dxyn(){
         }
     }
 }
+// Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
+void Chip8::OP_Ex9E(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t key = m_Registers[Vx];
+
+    if (m_Keypad[key]){
+        m_Pc += 2;
+    }
+}
+// Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
+void Chip8::OP_ExA1(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t key = m_Registers[Vx];
+
+    if (!m_Keypad[key]){
+        m_Pc += 2;
+    }
+}
+//load the value of the delay timer into Vx
+void Chip8::OP_Fx07(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+
+    m_Registers[Vx] = m_DelayTimer;
+}
+//Wait for a key press, store the value of the key in Vx.
+//All execution stops until a key is pressed, then the value of that key is stored in Vx.
+void Chip8::OP_Fx0A(){
+    uint8_t Vx = (m_Opcode & 0x0F00) >> 8u;
+
+    if (m_Keypad[0]) {
+
+        m_Registers[Vx] = 0;
+
+    } else if (m_Keypad[1]) {
+
+        m_Registers[Vx] = 1;
+
+    } else if (m_Keypad[2]) {
+
+        m_Registers[Vx] = 2;
+
+    } else if (m_Keypad[3]) {
+
+        m_Registers[Vx] = 3;
+
+    } else if (m_Keypad[4]) {
+
+        m_Registers[Vx] = 4;
+
+    } else if (m_Keypad[5]) {
+
+        m_Registers[Vx] = 5;
+
+    } else if (m_Keypad[6]) {
+
+        m_Registers[Vx] = 6;
+
+    } else if (m_Keypad[7]) {
+
+        m_Registers[Vx] = 7;
+
+    } else if (m_Keypad[8]) {
+
+        m_Registers[Vx] = 8;
+
+    } else if (m_Keypad[9]) {
+
+        m_Registers[Vx] = 9;
+
+    } else if (m_Keypad[10]) {
+
+        m_Registers[Vx] = 10;
+
+    } else if (m_Keypad[11]) {
+
+        m_Registers[Vx] = 11;
+
+    } else if (m_Keypad[12]) {
+
+        m_Registers[Vx] = 12;
+
+    } else if (m_Keypad[13]) {
+
+        m_Registers[Vx] = 13;
+
+    } else if (m_Keypad[14]) {
+
+        m_Registers[Vx] = 14;
+
+    } else if (m_Keypad[15]) {
+
+        m_Registers[Vx] = 15;
+
+    } else {
+
+        m_Pc -= 2;
+    }
+}
+//Set delay timer = to Vx
+void Chip8::OP_Fx15(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+
+    m_DelayTimer = m_Registers[Vx];
+}
+//Set Sount Timer = to Vx
+void Chip8::OP_Fx18(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+
+    m_AudioTimer = m_Registers[Vx];
+}
+//Set I = I + Vx
+void Chip8::OP_Fx1E(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+
+    m_Index = m_Index + m_Registers[Vx];
+}
+//Set I = location of sprite for digit Vx
+//The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
+void Chip8::OP_Fx29(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+
+    uint8_t digit = m_Registers[Vx];
+
+    m_Index = CHARACTER_SET_START_ADDRESS + (digit * 5);
+}
+//Store BCD representation of Vx in memory locations I, I+1, and I+2.
+//The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, 
+//the tens digit at location I+1, and the ones digit at location I+2.
+void Chip8:: OP_Fx33(){
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
+    uint8_t val = m_Registers[Vx];
+
+    //Ones place
+    m_Memory[m_Index + 2] = val % 10;
+    val = val/10; // int division
+
+    //Tens place
+    m_Memory[m_Index + 1] = val % 10;
+    val = val/10;
+
+    //Hundreds place
+    m_Memory[m_Index] = val % 10;
+
+}
+//Store registers V0 through Vx in memory starting at location I
+void Chip8:: OP_Fx55(){
+    uint8_t Vx = (m_Opcode & 0x0F00) >> 8u;
+
+    for (uint8_t i = 0; i <= Vx; i++) {
+        m_Memory[m_Index + i] = m_Registers[i];
+    }
+}
+//Read registers V0 through Vx from memory starting at location I.
+//The interpreter reads values from memory starting at location I into registers V0 through Vx.
+void Chip8::OP_Fx65(){
+    uint8_t Vx = (m_Opcode & 0x0F00) >> 8u;
+
+    for (uint8_t i = 0; i <= Vx; i++) {
+        m_Registers[i] = m_Memory[m_Index + i];
+    }
+}
 int main() {
     std::cout << "Hello World of Emulators" << std::endl;
     return 0;
