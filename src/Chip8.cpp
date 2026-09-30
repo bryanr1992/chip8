@@ -110,6 +110,33 @@ Chip8::Chip8()
     tableF[0x55] = &Chip8::OP_Fx55;
     tableF[0x65] = &Chip8::OP_Fx65;
 }
+
+//CPU CYCLE
+void Chip8::Cycle() {
+    //Fetch opcode
+    m_Opcode = (m_Memory[m_Pc] << 8u) | m_Memory[m_Pc + 1];
+
+    //increment pc
+    m_Pc += 2;
+
+    //Decode and Execute
+    //Grab upper half of the MSB of the opcode and mask it with 1111 0000 0000
+    //Then, we shift it to the right 12 times so that we have 0000 0000 1111
+    //What we essenially have now is the first hex digit of our function EG: Fx18 -> F
+    //We use this first digit to identify the function we need to cool from the function pointer table
+    //Further decoding might happen if we need to go to a different table like Table8 for example
+    ((*this).*(table[(m_Opcode & 0xF000u) >> 12u]))();
+
+    //Decrement Delay Timer if it's been incremented
+    if (m_DelayTimer > 0) {
+        --m_DelayTimer;
+    }
+
+    //Decrement Sound Timer if it's been incremented
+    if (m_AudioTimer > 0) {
+        --m_AudioTimer;
+    }
+}
  
 //load rom
 void Chip8::LoadRom(const char* filename) {

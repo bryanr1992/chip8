@@ -25,6 +25,7 @@ private:
     uint16_t m_Index{}; // index register to store mem address. Max address is 0xFFF (12-bits) so we need 16 bits to cover lvl
     uint16_t m_Opcode;// Stores CHIP8 CPU current instruction
 private:
+    void Cycle();
     void OP_00E0(); //cls
     void OP_00EE(); //RET
     void OP_1nnn(); //JP Addr
