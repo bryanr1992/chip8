@@ -561,3 +561,7 @@ void Chip8::TableE(){
 void Chip8::TableF(){
     ((*this).*tableF[m_Opcode & 0x000Fu])();
 }
+
+void Chip8::OP_NULL(){
+
+}

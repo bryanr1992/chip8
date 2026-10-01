@@ -24,8 +24,7 @@ private:
     uint16_t m_Pc{}; //program pointer
     uint16_t m_Index{}; // index register to store mem address. Max address is 0xFFF (12-bits) so we need 16 bits to cover lvl
     uint16_t m_Opcode;// Stores CHIP8 CPU current instruction
-private:
-    void Cycle();
+private: 
     void OP_00E0(); //cls
     void OP_00EE(); //RET
     void OP_1nnn(); //JP Addr
@@ -85,5 +84,6 @@ public:
     uint32_t m_Screen[SCREEN_WIDTH * SCREEN_HEIGHT]{};
 
 public:
+    void Cycle();
     void LoadRom(const char* filename);
 };
