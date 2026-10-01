@@ -224,7 +224,7 @@ void Chip8::OP_6xkk(){
     uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
     uint8_t kk = m_Opcode & 0x00FFu;
 
-    m_Registers[Vx] = Vx;
+    m_Registers[Vx] = kk;
 }
 // adds the value of kk and Vx and stores in Vx
 void Chip8::OP_7xkk(){
@@ -294,7 +294,7 @@ void Chip8::OP_8xy5(){
 // set VF to 1 if the least significant bit is 1 then divide by 2 (SHIFT RIGHT 1)
 void Chip8::OP_8xy6(){
     uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
-    m_Registers[0x0F] = m_Opcode & 0x01u;
+    m_Registers[0x0F] = m_Registers[Vx] & 0x01u;
 
     m_Registers[Vx] = m_Registers[Vx] >> 1;
 }
@@ -315,7 +315,7 @@ void Chip8::OP_8xy7(){
 void Chip8::OP_8xyE(){
     uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
 
-    m_Registers[0x0F] = m_Registers[Vx] & 0x80; // 0x80 = 1000 0000
+    m_Registers[0x0F] = (m_Registers[Vx] & 0x80u) >> 7u; // 0x80 = 1000 0000
 
     m_Registers[Vx] = m_Registers[Vx] << 1;
 }
