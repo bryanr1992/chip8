@@ -62,7 +62,7 @@ private:
 
     //used to generate random seed
     std::default_random_engine m_RandGen;
-    std::uniform_int_distribution<uint8_t> m_ByteDist;
+    std::uniform_int_distribution<unsigned int> m_ByteDist;
 
     //function pointer table
     void Table0();
