@@ -525,7 +525,7 @@ void Chip8:: OP_Fx33(){
 }
 //Store registers V0 through Vx in memory starting at location I
 void Chip8:: OP_Fx55(){
-    uint8_t Vx = (m_Opcode & 0x0F00) >> 8u;
+    uint8_t Vx = (m_Opcode & 0x0F00u) >> 8u;
 
     for (uint8_t i = 0; i <= Vx; i++) {
         m_Memory[m_Index + i] = m_Registers[i];
@@ -559,7 +559,7 @@ void Chip8::TableE(){
 }
 
 void Chip8::TableF(){
-    ((*this).*tableF[m_Opcode & 0x000Fu])();
+    ((*this).*tableF[m_Opcode & 0x00FFu])();
 }
 
 void Chip8::OP_NULL(){
